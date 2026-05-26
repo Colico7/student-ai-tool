@@ -114,18 +114,20 @@ export default function App() {
     setResult("");
     setError("");
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          system: SYSTEM_PROMPT,
-          messages: [{ role: "user", content: `请总结以下文章：\n\n${input}` }],
-        }),
-      });
-      const data = await res.json();
-      const text = data.content?.map(b => b.text || "").join("") || "总结失败，请重试。";
+  const apiKey = import.meta.env.VITE_API_KEY;
+  const res = await fetch("https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions", {
+  method: "POST",
+  headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
+  body: JSON.stringify({
+    model: "qwen-plus",
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: `请总结以下文章：\n\n${input}` }
+    ],
+  }),
+});
+const data = await res.json();
+const text = data.choices?.[0]?.message?.content || "总结失败，请重试。";
       setResult(text);
       setUsedCount(usedCount + 1);
       setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
